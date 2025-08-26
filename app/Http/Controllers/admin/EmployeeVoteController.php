@@ -217,7 +217,7 @@ class EmployeeVoteController extends Controller
 
 
 
-    public function voteStats()
+    public function voteAllStats()
     {
         return response()->json([
             'success' => true,

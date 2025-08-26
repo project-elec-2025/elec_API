@@ -36,7 +36,7 @@ Route::middleware('auth:sanctum')->group(function () {
             route::post('admin/employee/add', 'store');
             route::post('admin/employee/update/{id}', 'update');
             route::get('admin/listNoteVote', 'listNoteVote');
-            route::get('admin/voteStats', 'voteStats');
+            route::get('admin/voteStats', 'voteAllStats');
             route::get('getAllVoteStats', 'getAllVoteStats');
             route::get('getAllNotVote', 'getAllNotVote');
         });
