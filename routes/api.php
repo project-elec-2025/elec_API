@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // })->middleware('auth:sanctum');
 
-Route::get('/admin/login', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
 
     // Auth routes
@@ -24,7 +24,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/admin/updateUser/{id}', 'userUpdate');
             Route::post('/admin/changePassword/{id}', 'changePassword');
 
-            Route::post('/logout', 'logout');
+            Route::get('/logout', 'logout');
         }
     );
 
@@ -53,8 +53,10 @@ Route::middleware('auth:sanctum')->group(function () {
     // circle routes
     Route::controller(circleController::class)->group(function () {
         route::get('circle/index', 'getAllcircle');
+        route::get('circle/{id}', 'circelFindById');
         route::post('circle/add', 'add');
         route::post('circle/update/{id}', 'update');
+        route::post('circle/delete/{id}', 'delete');
     })->middleware(['role:admin']);
 
 

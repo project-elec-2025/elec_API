@@ -50,6 +50,11 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
+
+
+        // return response()->json([
+        //     "data" => $request->all()
+        // ]);
         // return response()->json(['data' => $request->all()]);
         $request->validate([
             'email' => 'required|email',
@@ -59,22 +64,28 @@ class AuthController extends Controller
         $user = User::where('email', $request->email)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
-            throw ValidationException::withMessages([
-                'email' => ['The provided credentials are incorrect.'],
+            return response()->json([
+                'success' => false,
+                'message' => 'The provided credentials are incorrect.'
+            ]);
+        } else {
+            return response()->json([
+                'success' => true,
+
+                'user' => $user,
+                'token' => $user->createToken('auth_token')->plainTextToken
             ]);
         }
-
-        return response()->json([
-            'user' => $user,
-            'token' => $user->createToken('auth_token')->plainTextToken
-        ]);
     }
 
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
 
-        return response()->json(['message' => 'Logged out successfully']);
+        return response()->json([
+            'success' => true,
+            'message' => 'Logged out successfully'
+        ]);
     }
 
     public function getUserList()
