@@ -28,6 +28,24 @@ class baseController extends Controller
             'data' => $data
         ]);
     }
+    //
+    public function getBaseById($id)
+    {
+        $data = base::with('cirlce:id,circle_name')->where('id', $id)->get();
+        if ($data->count() == 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Empty base data',
+                'data' => $data
+            ]);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'find base data',
+            'data' => $data
+        ]);
+    }
+
     public function getBaseByCircle($circle_id)
     {
         $data = base::with('cirlce:id,circle_name')->where('circle_id', $circle_id)->get();
@@ -48,45 +66,44 @@ class baseController extends Controller
     public function add(Request $request)
     {
 
-        //   return response()->json($request->all());
-        $validated = Validator::make($request->all(), [
+
+        $request->validate([
             'base_name' => 'required|string|max:255|unique:bases,base_name',
-            'cirlce_id' => 'required|numeric'
+            'circle_id' => 'required|numeric'
         ]);
-        if ($validated->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation error',
-                'errors' => $validated->errors()
-            ], 422);
-        }
+
 
         base::create([
             'base_name' => $request->base_name,
-            'circle_id' => $request->cirlce_id
+            'circle_id' => $request->circle_id
         ]);
         return response()->json([
             'success' => true,
             'message' => 'base added succcessfully',
 
-        ], 200);
+        ], 201);
     }
 
     public function update(Request $request, $id)
     {
-        $validated = Validator::make($request->all(), [
-            'base_name' => 'required|string|max:255|unique:bases,base_name,' . $id,
-            'cirlce_id' => 'required|numeric'
-        ]);
-        if ($validated->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation error',
-                'errors' => $validated->errors()
-            ], 422);
-        }
+        // return response()->json([
+        //     'success' => true,
+        //     'message' => $request->all(),
 
-        base::find($id)->update(['base_name' => $request->base_name, 'circle_id' => $request->cirlce_id]);
+        // ], 200);
+        $request->validate([
+            'base_name' => 'required|string|max:255|unique:bases,base_name,' . $id,
+            'circle_id' => 'required|numeric'
+        ]);
+        // if ($validated->fails()) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'Validation error',
+        //         'errors' => $validated->errors()
+        //     ], 422);
+        // }
+
+        base::find($id)->update(['base_name' => $request->base_name, 'circle_id' => $request->circle_id]);
         return response()->json([
             'success' => true,
             'message' => 'base updated succcessfully',

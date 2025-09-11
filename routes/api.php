@@ -33,11 +33,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
         //admin
         route::middleware(['role:admin'])->group(function () {
+            route::get('admin/employee/index', 'index'); //هەموو کارمەندا
+
             route::post('admin/employee/add', 'store');
             route::post('admin/employee/update/{id}', 'update');
-            route::get('admin/listNoteVote', 'listNoteVote');
+            route::get('admin/listNoteVote', 'listNoteVote'); // ئەوانەی دەنگیان نەداوە
+            route::get('admin/listVoteByBase', 'listVoteByBaseId'); //   ئەوانەی دەنگیان نەداوە بەپێی بنکە
+            route::get('admin/listVoteByCircleId', 'listVoteByCircleId'); //   ئەوانەی دەنگیان نەداوە بەپێی بازنە
             route::get('admin/voteStats', 'voteAllStats');
-            route::get('getAllVoteStats', 'getAllVoteStats');
+            route::get('getAllVoteStats', 'listVote'); // ئەوانەی دەنگیان داوە
             route::get('getAllNotVote', 'getAllNotVote');
         });
 
@@ -63,7 +67,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // base routes
     Route::controller(BaseController::class)->group(function () {
         route::get('base/index', 'getAllBase');
+        route::get('base/find/{id}', 'getBaseById');
         route::get('base/getBaseByCircle/{base}', 'getBaseByCircle');
+
         route::post('base/add', 'add');
         route::post('base/update/{id}', 'update');
 

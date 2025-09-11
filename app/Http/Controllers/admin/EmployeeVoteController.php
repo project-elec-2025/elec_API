@@ -5,15 +5,43 @@ namespace App\Http\Controllers\admin;
 use App\Http\Controllers\Controller;
 use App\Models\base;
 use App\Models\EmployeeVote;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class EmployeeVoteController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return EmployeeVote::with('user')->get();
+
+        $user_id = $request->userid;
+        $user = User::find($user_id);
+        $perPage = $request->get('per_page', 10); // default to 10
+        $page = $request->get('page', 1);
+
+        if (Auth::user()->role == "admin") {
+            $data = EmployeeVote::with(['cirlces', 'base'])
+
+                ->paginate($perPage, ['*'], 'page', $page);
+        } else {
+            $data = EmployeeVote::with(['cirlces', 'base'])
+                ->where('base_id', Auth::user()->base_id)
+
+                ->paginate($perPage, ['*'], 'page', $page);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'List of those who did not vote',
+            'data' => $data->items(),
+            'pagination' => [
+                'current_page' => $data->currentPage(),
+                'last_page' => $data->lastPage(),
+                'per_page' => $data->perPage(),
+                'total' => $data->total(),
+            ]
+        ], 200);
     }
 
     public function store(Request $request)
@@ -203,20 +231,130 @@ class EmployeeVoteController extends Controller
 
 
 
-    public function listNoteVote()
+    public function listNoteVote(Request $request)
     {
-        $data = EmployeeVote::where('base_id', Auth::user()->base_id)
-            ->where('is_election', '=', false)
-            ->get();
+
+
+        $perPage = $request->get('per_page', 10); // default to 10
+        $page = $request->get('page', 1);
+
+        if (Auth::user()->role === "admin") {
+            $data = EmployeeVote::with(['cirlces', 'base'])
+                ->where('is_election', false)
+                ->paginate($perPage, ['*'], 'page', $page);
+        } else {
+            $data = EmployeeVote::with(['cirlces', 'base'])
+                ->where('base_id', Auth::user()->base_id)
+                ->where('is_election', false)
+                ->paginate($perPage, ['*'], 'page', $page);
+        }
 
         return response()->json([
             'success' => true,
             'message' => 'List of those who did not vote',
-            'data' => $data,
+            'data' => $data->items(),
+            'pagination' => [
+                'current_page' => $data->currentPage(),
+                'last_page' => $data->lastPage(),
+                'per_page' => $data->perPage(),
+                'total' => $data->total(),
+            ]
+        ], 200);
+    }
+    public function listVoteByBaseId(Request $request)
+    {
+
+
+        $perPage = $request->get('per_page', 10); // default to 10
+        $page = $request->get('page', 1);
+        $base_id = $request->get('baseId');
+
+        if (Auth::user()->role === "admin") {
+            $data = EmployeeVote::with(['cirlces', 'base'])
+                ->where('base_id', $base_id)
+                ->paginate($perPage, ['*'], 'page', $page);
+        } else {
+            $data = EmployeeVote::with(['cirlces', 'base'])
+                ->where('base_id', Auth::user()->base_id)
+                // ->where('base_id', $base_id)
+                ->paginate($perPage, ['*'], 'page', $page);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'List of those who did not vote',
+            'data' => $data->items(),
+            'pagination' => [
+                'current_page' => $data->currentPage(),
+                'last_page' => $data->lastPage(),
+                'per_page' => $data->perPage(),
+                'total' => $data->total(),
+            ]
         ], 200);
     }
 
+    // listVoteByCircleId
+    public function listVoteByCircleId(Request $request)
+    {
 
+
+        $perPage = $request->get('per_page', 10); // default to 10
+        $page = $request->get('page', 1);
+        $circle_id = $request->get('circleId');
+
+        if (Auth::user()->role === "admin") {
+            $data = EmployeeVote::with(['cirlces', 'base'])
+                ->where('circle_id', $circle_id)
+                ->paginate($perPage, ['*'], 'page', $page);
+        } else {
+            $data = EmployeeVote::with(['cirlces', 'base'])
+                ->where('circle_id', Auth::user()->circle_id)
+                // ->where('base_id', $base_id)
+                ->paginate($perPage, ['*'], 'page', $page);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'List of those who did not vote',
+            'data' => $data->items(),
+            'pagination' => [
+                'current_page' => $data->currentPage(),
+                'last_page' => $data->lastPage(),
+                'per_page' => $data->perPage(),
+                'total' => $data->total(),
+            ]
+        ], 200);
+    }
+    public function listVote(Request $request)
+    {
+
+
+        $perPage = $request->get('per_page', 10); // default to 10
+        $page = $request->get('page', 1);
+
+        if (Auth::user()->role === "admin") {
+            $data = EmployeeVote::with(['cirlces', 'base'])
+                ->where('is_election', true)
+                ->paginate($perPage, ['*'], 'page', $page);
+        } else {
+            $data = EmployeeVote::with(['cirlces', 'base'])
+                ->where('base_id', Auth::user()->base_id)
+                ->where('is_election', true)
+                ->paginate($perPage, ['*'], 'page', $page);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'List of those who did not vote',
+            'data' => $data->items(),
+            'pagination' => [
+                'current_page' => $data->currentPage(),
+                'last_page' => $data->lastPage(),
+                'per_page' => $data->perPage(),
+                'total' => $data->total(),
+            ]
+        ], 200);
+    }
 
     public function voteAllStats()
     {
@@ -284,8 +422,9 @@ class EmployeeVoteController extends Controller
 
     public function getAllNotVote()
     {
+
         // Get paginated non-voting employees grouped by base
-        $notVotedByBase = Base::with(['employeeVotes' => function ($query) {
+        $notVotedByBase = Base::with(['cirlce', 'employeeVotes' => function ($query) {
             $query->where('is_election', false)
                 ->select('id', 'fullName', 'mobile', 'base_id', 'is_election');
         }])
@@ -298,6 +437,7 @@ class EmployeeVoteController extends Controller
             return [
                 // 'base_id' => $base->id,
                 'base_name' => $base->base_name,
+                //'circle_name' => $cirlce->cirlce_name,
                 //   'not_voted_count' => $base->employeeVotes->count(),
                 'list' => $base->employeeVotes->map(function ($employee) {
                     return [

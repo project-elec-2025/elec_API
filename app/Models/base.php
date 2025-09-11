@@ -15,9 +15,8 @@ class base extends Model
     {
         return $this->hasMany(employeeVote::class, 'base_id');
     }
-
     public function cirlce()
     {
-        return $this->hasOne(circle::class,  'id', 'circle_id');
+        return $this->hasMany(circle::class, 'id', 'circle_id');
     }
 }

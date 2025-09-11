@@ -124,36 +124,32 @@ class AuthController extends Controller
     }
     public function userUpdate(Request $request, $id)
     {
-        $validated = Validator::make($request->all(), [
+
+        $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|unique:users,email,' . $id,
             'bnka' => 'required',
             'role' => 'required',
+            'circle_id' => 'required',
+            'phone' => 'required|min:11',
             'isActive' => 'required',
         ]);
-        // return response()->json([
-        //     'user' => $request->all()
-        // ]);
-        if ($validated->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation error',
-                'errors' => $validated->errors()
-            ], 422);
-        }
-        // ], 201);
+
+
         $user = User::find($id);
 
         $user->name = $request->name;
         $user->email = $request->email;
-        $user->bnka = $request->bnka;
+        $user->base_id = $request->bnka;
         $user->role = $request->role;
+        $user->phone = $request->phone;
         $user->isActive = $request->isActive;
+        $user->circle_id = $request->circle_id;
 
         $user->save();
 
         return response()->json([
-            'user' => $user,
+            'success' => true,
             'message' => 'update user successfully'
         ], 201);
     }

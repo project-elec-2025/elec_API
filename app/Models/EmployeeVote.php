@@ -36,4 +36,8 @@ class EmployeeVote extends Model
     {
         return $this->belongsTo(base::class, 'base_id', 'id');
     }
+    public function cirlces()
+    {
+        return $this->belongsTo(circle::class,  'circle_id', 'id');
+    }
 }
