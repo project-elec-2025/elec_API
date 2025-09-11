@@ -205,7 +205,8 @@ class EmployeeVoteController extends Controller
 
     public function listNoteVote()
     {
-        $data = EmployeeVote::where('is_election', '=', false)
+        $data = EmployeeVote::where('base_id', Auth::user()->base_id)
+            ->where('is_election', '=', false)
             ->get();
 
         return response()->json([
@@ -222,9 +223,9 @@ class EmployeeVoteController extends Controller
         return response()->json([
             'success' => true,
             'data' => [
-                'all' => EmployeeVote::count(),
-                'voted' => EmployeeVote::where('is_election', true)->count(),
-                'not_voted' => EmployeeVote::where('is_election', false)->count()
+                'all' => EmployeeVote::where('base_id', Auth::user()->base_id)->count(),
+                'voted' => EmployeeVote::where('base_id', Auth::user()->base_id)->where('is_election', true)->count(),
+                'not_voted' => EmployeeVote::where('base_id', Auth::user()->base_id)->where('is_election', false)->count()
             ]
         ], 200);
     }

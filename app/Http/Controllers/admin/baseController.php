@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\base;
 use App\Models\EmployeeVote;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class baseController extends Controller
@@ -27,9 +28,9 @@ class baseController extends Controller
             'data' => $data
         ]);
     }
-    public function getBaseByCircle($base)
+    public function getBaseByCircle($circle_id)
     {
-        $data = base::with('cirlce:id,circle_name')->where('circle_id', $base)->get();
+        $data = base::with('cirlce:id,circle_name')->where('circle_id', $circle_id)->get();
         if ($data->count() == 0) {
             return response()->json([
                 'success' => false,

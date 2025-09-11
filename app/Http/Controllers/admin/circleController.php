@@ -25,7 +25,7 @@ class circleController extends Controller
             'success' => true,
             'message' => 'all circle data',
             'AllData' => $data,
-            // 'user_id' => Auth::user(),
+
         ]);
     }
     public function circelFindById($id)

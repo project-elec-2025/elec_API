@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiToken;
 use Laravel\Sanctum\HasApiTokens;
+
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
@@ -22,6 +23,10 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'phone',
+        'base_id',
+        'circle_id',
+        'isActive'
     ];
 
     /**
@@ -34,6 +39,16 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    public function circle()
+    {
+
+        return $this->hasMany(circle::class,  'id', 'circle_id');
+    }
+    public function base()
+    {
+
+        return $this->hasMany(base::class,  'id', 'base_id');
+    }
     /**
      * Get the attributes that should be cast.
      *

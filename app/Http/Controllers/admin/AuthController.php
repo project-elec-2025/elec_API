@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -13,35 +14,34 @@ class AuthController extends Controller
 {
     public function register(Request $request)
     {
-        $validated = Validator::make($request->all(), [
+        $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
             'bnka' => 'required',
             'role' => 'required',
+            'circle_id' => 'required',
+            'phone' => 'required|min:11',
+            'isActive' => 'required',
         ]);
-        // return response()->json([
-        //     'user' => $request->all()
-        // ]);
-        if ($validated->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation error',
-                'errors' => $validated->errors()
-            ], 422);
-        }
-        // ], 201);
+
+
         $user = new User();
 
         $user->name = $request->name;
         $user->email = $request->email;
         $user->password = Hash::make($request->password);
-        $user->bnka = $request->bnka;
+        $user->base_id = $request->bnka;
         $user->role = $request->role;
+        $user->phone = $request->phone;
+        $user->isActive = $request->isActive;
+        $user->circle_id = $request->circle_id;
+        //circle_id
 
         $user->save();
 
         return response()->json([
+            'success' => true,
             'user' => $user,
             // 'token' => $user->createToken('auth_token')->plainTextToken
             'message' => 'register user successfully'
@@ -52,29 +52,38 @@ class AuthController extends Controller
     {
 
 
-        // return response()->json([
-        //     "data" => $request->all()
-        // ]);
-        // return response()->json(['data' => $request->all()]);
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
+        try {
 
-        $user = User::where('email', $request->email)->first();
+            $request->validate([
+                'email' => 'required|email',
+                'password' => 'required',
+            ]);
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+            $user = User::where('email', $request->email)->first();
+
+            if (!$user || !Hash::check($request->password, $user->password)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'email or password incorrect.'
+                ]);
+            } else if ($user->isActive == 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'you cant loging'
+                ]);
+            } else {
+                return response()->json([
+                    'success' => true,
+
+                    'user' => $user,
+                    'token' => $user->createToken('auth_token')->plainTextToken
+                ]);
+            }
+        } catch (Exception $error) {
             return response()->json([
                 'success' => false,
-                'message' => 'The provided credentials are incorrect.'
-            ]);
-        } else {
-            return response()->json([
-                'success' => true,
-
-                'user' => $user,
-                'token' => $user->createToken('auth_token')->plainTextToken
-            ]);
+                'message' => $error->getMessage(), // Fixed syntax error
+            ], 500); // Added proper HTTP status code
         }
     }
 
@@ -90,7 +99,7 @@ class AuthController extends Controller
 
     public function getUserList()
     {
-        $user = User::orderby('id', 'desc')->get();
+        $user = User::with(['circle', 'base'])->orderby('id', 'desc')->get();
 
         return response()->json([
             'success' => true,
