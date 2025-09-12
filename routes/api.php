@@ -43,6 +43,11 @@ Route::middleware('auth:sanctum')->group(function () {
             route::get('admin/voteStats', 'voteAllStats');
             route::get('getAllVoteStats', 'listVote'); // ئەوانەی دەنگیان داوە
             route::get('getAllNotVote', 'getAllNotVote');
+            // amar
+            route::get('admin/amar', 'amar');
+            route::get('admin/getAllVoteStats', 'getAllVoteStats');
+
+
         });
 
 
