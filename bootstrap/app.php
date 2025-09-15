@@ -14,8 +14,15 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
+               //Fruitcake\Cors\HandleCors::class,
+            // \App\Http\Middleware\PreflightResponse::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
     })->create();
+
+    // protected $middleware = [
+    //     \Fruitcake\Cors\HandleCors::class, // Add this line
+    //     // Other middleware...
+    // ];

@@ -54,31 +54,47 @@ class AuthController extends Controller
 
         try {
 
-            $request->validate([
-                'email' => 'required|email',
+
+
+            // return response()->json([
+            //     'success' => false,
+            //     'message' => 'Email or password incorrect.'
+            // ], 401);
+
+            // ✅ Validation
+            $credentials = $request->validate([
+                'email'    => 'required|email',
                 'password' => 'required',
             ]);
 
-            $user = User::where('email', $request->email)->first();
+            // ✅ Fetch user with relations (only needed fields)
+            $user = User::with(['circle:id,circle_name', 'base:id,base_name'])
+                ->where('email', $credentials['email'])
+                // ->select(['id', 'name', 'role', 'isActive', 'email', 'password', 'circel_name', 'base_name'])
+                ->first();
 
-            if (!$user || !Hash::check($request->password, $user->password)) {
+            // ❌ If no user or password mismatch
+            if (!$user || !Hash::check($credentials['password'], $user->password)) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'email or password incorrect.'
-                ]);
-            } else if ($user->isActive == 0) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'you cant loging'
-                ]);
-            } else {
-                return response()->json([
-                    'success' => true,
-
-                    'user' => $user,
-                    'token' => $user->createToken('auth_token')->plainTextToken
-                ]);
+                    'message' => 'Email or password incorrect.'
+                ], 401);
             }
+
+            // ❌ If account inactive
+            if ($user->isActive == 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You cannot log in. Account is inactive.'
+                ], 403);
+            }
+
+            // ✅ Success → Create Token
+            return response()->json([
+                'success' => true,
+                'user'    => $user->makeHidden('password'), // 🔒 Hide password
+                'token'   => $user->createToken('auth_token')->plainTextToken
+            ], 200);
         } catch (Exception $error) {
             return response()->json([
                 'success' => false,

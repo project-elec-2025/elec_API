@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Route;
 // })->middleware('auth:sanctum');
 
 Route::post('/login', [AuthController::class, 'login']);
+// route::get('admin/employee/index', [EmployeeVoteController::class, 'index']); //هەموو کارمەندا
+
 Route::middleware('auth:sanctum')->group(function () {
 
     // Auth routes
@@ -33,7 +35,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
         //admin
         route::middleware(['role:admin'])->group(function () {
-            route::get('admin/employee/index', 'index'); //هەموو کارمەندا
 
             route::post('admin/employee/add', 'store');
             route::post('admin/employee/update/{id}', 'update');
@@ -45,15 +46,24 @@ Route::middleware('auth:sanctum')->group(function () {
             route::get('getAllNotVote', 'getAllNotVote');
             // amar
             route::get('admin/amar', 'amar');
-            route::get('admin/getAllVoteStats', 'getAllVoteStats');
-
-
+            route::get('admin/getAllVoteStats', 'getAllVoteStats'); //ئاماری داشبۆردی ئەدمین
         });
 
 
 
         // admin and user
+        route::get('admin/voteStat', 'voteAllStats'); //  بۆ ئەمین هەموو زانینی کۆی ژمارەی کارمەنداکان ، هاتوو ، نەهاتوو ، بۆ چاودێر تەنها بنکەی خۆی
+
         route::get('findEmployee/{search}', 'findEmployee');
+        route::get('findEmployeeByMobileName/{search}', 'findEmployeeByNameAndMobile');
+
+
+
+        route::get('admin/employee/index', 'index'); //هەموو کارمەندا
+        //cahwder
+        route::get('employee/hatw', 'allhatw'); //هەموو هاتوەکان
+        route::get('employee/nahatw', 'allNahatw'); //هەموو نەواتوەکان
+
         // route::get('findEmployeeByMobile/{mobile}', 'findEmployeeByMobile');
         route::post('vote/{id}', 'vote');
         route::post('AddNoteForEmployee/{id}', 'AddNoteForEmployee');

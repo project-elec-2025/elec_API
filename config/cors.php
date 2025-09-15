@@ -15,20 +15,13 @@ return [
     |
     */
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie'],
-
-    'allowed_methods' => ['*'],
-
-    'allowed_origins' => ['*'],
-
+    'paths' => ['api/*'], // Ensure routes under 'api/' are handled
+    'allowed_methods' => ['*'], // Allow all HTTP methods (GET, POST, etc.)
+    'allowed_origins' => ['*'], // Your frontend origin 'http://192.168.43.29:3000'
     'allowed_origins_patterns' => [],
-
-    'allowed_headers' => ['*'],
-
+    'allowed_headers' => ['*'], // Allow all headers
     'exposed_headers' => [],
-
     'max_age' => 0,
-
     'supports_credentials' => true,
 
 ];
