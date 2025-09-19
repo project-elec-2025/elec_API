@@ -58,7 +58,8 @@ class AuthController extends Controller
 
             // return response()->json([
             //     'success' => false,
-            //     'message' => 'Email or password incorrect.'
+            //     'message' => 'Email or password incorrect.',
+            //     'data' => $request->email
             // ], 401);
 
             // ✅ Validation

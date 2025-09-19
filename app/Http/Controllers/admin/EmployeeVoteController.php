@@ -62,33 +62,115 @@ class EmployeeVoteController extends Controller
         }
     }
 
-    //allhatw
-    public function allhatw()
-    {
 
-        $data = EmployeeVote::select(['id', 'fullName', 'card_number', 'mobile', 'address', 'unit_office', 'is_election', 'note'])
-            ->where('base_id', Auth::user()->base_id)
-            ->where('is_election', true)
-            ->get();
+    public function show($id)
+    {
+        $vote = EmployeeVote::find($id);
+        if (!$vote) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Employee Vote not found',
+            ]);
+        }
         return response()->json([
             'success' => true,
-            'message' => 'List of those who did not vote',
-            'data' => $data,
-
-        ], 200);
+            'message' => 'Employee Vote found',
+            'data' => $vote
+        ]);
     }
 
-    public function allNahatw()
+    //allhatw
+    // In your Laravel controller method
+    public function allhatw(Request $request)
     {
-        $data = EmployeeVote::select(['id', 'fullName', 'card_number', 'mobile', 'address', 'unit_office', 'is_election', 'note'])
+        $perPage = $request->input('per_page', 20);
+        $search = $request->input('search');
+
+        $query = EmployeeVote::select(['id', 'fullName', 'card_number', 'mobile', 'address', 'unit_office', 'is_election', 'note'])
             ->where('base_id', Auth::user()->base_id)
-            ->where('is_election', false)
-            ->get();
+            ->where('is_election', true);
+
+        // Add search functionality
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('fullName', 'like', "%{$search}%")
+                    ->orWhere('card_number', 'like', "%{$search}%")
+                    ->orWhere('mobile', 'like', "%{$search}%");
+            });
+        }
+
+        $data = $query->paginate($perPage);
+
         return response()->json([
             'success' => true,
-            'message' => 'List of those who did not vote',
-            'data' => $data,
+            'message' => 'List of those who voted',
+            'data' => $data->items(),
+            'pagination' => [
+                'total' => $data->total(),
+                'per_page' => $data->perPage(),
+                'current_page' => $data->currentPage(),
+                'last_page' => $data->lastPage(),
+                'from' => $data->firstItem(),
+                'to' => $data->lastItem(),
+            ],
+        ], 200);
+    }
+    public function allNahatw(Request $request)
+    {
+        $perPage = $request->input('per_page', 20);
+        $search = $request->input('search');
 
+        $query = EmployeeVote::select(['id', 'fullName', 'card_number', 'mobile', 'address', 'unit_office', 'is_election', 'note'])
+            ->where('base_id', Auth::user()->base_id)
+            ->where('is_election', false);
+
+        // Add search functionality
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('fullName', 'like', "%{$search}%")
+                    ->orWhere('card_number', 'like', "%{$search}%")
+                    ->orWhere('mobile', 'like', "%{$search}%");
+            });
+        }
+
+        $data = $query->paginate($perPage);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'List of those who voted',
+            'data' => $data->items(),
+            'pagination' => [
+                'total' => $data->total(),
+                'per_page' => $data->perPage(),
+                'current_page' => $data->currentPage(),
+                'last_page' => $data->lastPage(),
+                'from' => $data->firstItem(),
+                'to' => $data->lastItem(),
+            ],
+        ], 200);
+    }
+    // In your EmployeeController
+    public function search(Request $request)
+    {
+        $search = $request->input('q');
+
+        $query = EmployeeVote::select(['id', 'fullName', 'card_number', 'mobile', 'is_election'])
+            ->where('base_id', Auth::user()->base_id);
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('fullName', 'like', "%{$search}%")
+                    ->orWhere('card_number', 'like', "%{$search}%")
+                    ->orWhere('mobile', 'like', "%{$search}%");
+            });
+        }
+
+        $results = $query->limit(50)->get();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Search results',
+            'data' => $results
         ], 200);
     }
 
@@ -147,7 +229,7 @@ class EmployeeVoteController extends Controller
             'address' => 'required|string',
             'card_number' => 'required|string|unique:employee_votes,card_number,' . $id,
             'unit_office' => 'required|string',
-            'base' => 'required|string',
+            // 'base' => 'required|string',
             'base_id' => 'required|numeric',
             'circle_id' => 'required|numeric',
             // 'is_election' => 'boolean',
@@ -360,6 +442,31 @@ class EmployeeVoteController extends Controller
                 'per_page' => $data->perPage(),
                 'total' => $data->total(),
             ]
+        ], 200);
+    }
+    public function listNoteVoteTest()
+    {
+
+
+        // $perPage = $request->get('per_page', 10); // default to 10
+        // $page = $request->get('page', 1);
+
+        // if (Auth::user()->role === "admin") {
+        //     $data = EmployeeVote::with(['cirlces', 'base'])
+        //         ->where('is_election', false)
+        //         ->paginate($perPage, ['*'], 'page', $page);
+        // } else {
+        $data = EmployeeVote::with(['cirlces', 'base'])
+            // ->where('base_id', Auth::user()->base_id)
+            ->where('is_election', false)->get();
+        // ->paginate($perPage, ['*'], 'page', $page);
+        // }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'List of those who did not vote',
+            'data' => $data,
+
         ], 200);
     }
     public function listVoteByBaseId(Request $request)

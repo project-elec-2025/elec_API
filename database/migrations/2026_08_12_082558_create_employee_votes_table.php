@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('address'); // ناونیشانی نیشتەجێبوون
             $table->string('card_number'); // ژمارەی کارت
             $table->string('unit_office'); // یەکە/فەرمانگە
-            $table->string('base'); // بنکە
+            $table->string('base')->nullable(); // بنکە
             // $table->integer('base_id'); // بنکە
             $table->integer('base_id')->nullable()->comment('بنکەی هەلبژاردن');
             $table->integer('circle_id')->nullable()->comment('بازنەی هەلبژاردن');
