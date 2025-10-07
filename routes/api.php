@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\Admin\AuthController;
-use App\Http\Controllers\admin\BaseController;
+use App\Http\Controllers\admin\AuthController;
+use App\Http\Controllers\admin\baseController;
 use App\Http\Controllers\admin\circleController;
 use App\Http\Controllers\admin\EmployeeVoteController;
 use App\Http\Controllers\admin\personController;
@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::post('/login', [AuthController::class, 'login']);
-// route::get('admin/employee/index', [EmployeeVoteController::class, 'index']); //هەموو کارمەندا
+route::get('admin/employee/indexx', [EmployeeVoteController::class, 'indexx']); //هەموو کارمەندا
 // route::get('admin/listNoteVoteTest', [EmployeeVoteController::class, 'listNoteVoteTest']); // ئەوانەی دەنگیان نەداوە
 
 Route::middleware('auth:sanctum')->group(
@@ -98,7 +98,7 @@ Route::middleware('auth:sanctum')->group(
 
 
         // base routes
-        Route::controller(BaseController::class)->group(function () {
+        Route::controller(baseController::class)->group(function () {
             route::get('base/index', 'getAllBase');
             route::get('base/find/{id}', 'getBaseById');
             route::get('base/getBaseByCircle/{base}', 'getBaseByCircle');

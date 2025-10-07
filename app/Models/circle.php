@@ -13,6 +13,6 @@ class circle extends Model
 
     public function bases(): HasMany
     {
-        return $this->hasMany(Base::class);
+        return $this->hasMany(base::class);
     }
 }

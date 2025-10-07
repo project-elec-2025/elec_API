@@ -15,6 +15,52 @@ use function PHPUnit\Framework\isNull;
 
 class EmployeeVoteController extends Controller
 {
+
+    public function indexx()
+    {
+
+
+        // return response()->json([
+        //     'success' => true,
+        //     'message' => 'List of those who did not vote',
+        //     'data' => 'null'
+
+        // ], 200);
+
+        // $user_id = $request->userid;
+        // $user = User::find($user_id);
+
+        if (Auth::user()->role == "admin") {
+            $data = EmployeeVote::with(['cirlces', 'base'])
+
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'List of those who did not vote',
+                'data' => $data,
+                // 'pagination' => [
+                //     'current_page' => $data->currentPage(),
+                //     'last_page' => $data->lastPage(),
+                //     'per_page' => $data->perPage(),
+                //     'total' => $data->total(),
+                // ]
+            ], 200);
+        } else {
+
+            $data = EmployeeVote::select(['id', 'fullName', 'card_number', 'mobile', 'address', 'unit_office', 'is_election', 'note'])
+                ->where('base_id', Auth::user()->base_id)
+                // ->where('card_number', $request->get('search'))
+                ->get();
+            return response()->json([
+                'success' => true,
+                'message' => 'List of those who did not vote',
+                'data' => $data,
+
+            ], 200);
+        }
+    }
+
     public function index(Request $request)
     {
 
