@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\LoginLog;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+// use Stevebauman\Location\Facades\Location;
 
 class AuthController extends Controller
 {
@@ -56,11 +59,7 @@ class AuthController extends Controller
 
 
 
-            // return response()->json([
-            //     'success' => false,
-            //     'message' => 'Email or password incorrect.',
-            //     'data' => $request->email
-            // ], 401);
+
 
             // ✅ Validation
             $credentials = $request->validate([
@@ -90,6 +89,45 @@ class AuthController extends Controller
                 ], 403);
             }
 
+
+
+            // Get client IP and user agent
+
+
+            // return  response()->json([
+            //     'ip' => $request->all(),
+            // ]);
+            // // You can override IP for testing:
+            // // $ip = '66.102.0.0'; // Google's public IP
+
+            // // $ip = ; // Replace with request IP if needed
+            //$ip = $request->ip; //'10.77.142.29'; // e.g., 192.168.1.1 or real IP
+
+            // // Get location data
+            // $location = Location::get($ip);
+            // // if (!$location) {
+            // //     return response()->json(['error' => 'Location not found'], 404);
+            // // }
+
+            // return response()->json([
+            //     'ip' => $ip,
+            //     'country' => $location->countryName,
+            //     'countryCode' => $location->countryCode,
+            //     'region' => $location->regionName,
+            //     'city' => $location->cityName,
+            //     'latitude' => $location->latitude,
+            //     'longitude' => $location->longitude,
+            //     'timezone' => $location->timezone,
+            // ]);
+            // Log login data
+            $ip = $request->ip;
+
+            LoginLog::create([
+                'user_id' => $user->id,
+                'ip_address' => $ip,
+                'status' => 'login'
+            ]);
+
             // ✅ Success → Create Token
             return response()->json([
                 'success' => true,
@@ -106,6 +144,16 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
+
+
+        // Get client IP and user agent
+        $ip = $request->ip;
+        // Log login data
+        LoginLog::create([
+            'user_id' => Auth::user()->id,
+            'ip_address' => $ip,
+            'status' => 'logout'
+        ]);
         $request->user()->currentAccessToken()->delete();
 
         return response()->json([
@@ -192,5 +240,30 @@ class AuthController extends Controller
             'success' => true,
             'message' => 'Password changed successfully'
         ]);
+    }
+
+
+    public function index(Request $request)
+    {
+        $query = LoginLog::query();
+
+        if ($request->has('ip_address')) {
+            $query->where('ip_address', 'like', '%' . $request->ip_address . '%');
+        }
+
+        if ($request->has('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->has('start_date') && $request->has('end_date')) {
+            $query->whereBetween('created_at', [
+                $request->start_date,
+                $request->end_date
+            ]);
+        }
+
+        $logs = $query->with('user')->orderBy('created_at', 'desc')->get();
+
+        return response()->json($logs);
     }
 }

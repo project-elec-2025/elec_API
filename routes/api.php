@@ -27,7 +27,10 @@ Route::middleware('auth:sanctum')->group(
                 Route::post('/admin/updateUser/{id}', 'userUpdate');
                 Route::post('/admin/changePassword/{id}', 'changePassword');
 
-                Route::get('/logout', 'logout');
+                Route::get('/login-logs', 'index');
+
+
+                Route::post('/logout', 'logout');
             }
         );
 
@@ -49,6 +52,30 @@ Route::middleware('auth:sanctum')->group(
                 // amar
                 route::get('admin/amar', 'amar');
                 route::get('admin/getAllVoteStats', 'getAllVoteStats'); //ئاماری داشبۆردی ئەدمین
+
+
+                // get doublicated
+                // Route::get('admin/getdoublicate', 'doublicateData');
+
+                // Individual card number existence check - Multiple variations
+                Route::get('/admin/check-card-number-exists/{card_number}', [EmployeeVoteController::class, 'checkCardNumberExists']);
+                Route::get('/admin/check-card-number-exists', [EmployeeVoteController::class, 'checkCardNumberExists']); // Query parameter version
+
+                // Bulk card number existence check - POST and GET versions
+                Route::post('/admin/check-card-numbers-exist', [EmployeeVoteController::class, 'checkCardNumbersExistBulk']);
+                Route::get('/admin/check-card-numbers-exist', [EmployeeVoteController::class, 'checkCardNumbersExistBulk']); // GET version
+
+                // Card number details and summary
+                Route::get('/admin/card-numbers-summary', [EmployeeVoteController::class, 'getCardNumbersSummary']);
+                Route::get('/admin/card-number-details/{card_number}', [EmployeeVoteController::class, 'getCardNumberDetails']);
+                Route::get('/admin/card-number-details', [EmployeeVoteController::class, 'getCardNumberDetails']); // Query parameter version
+
+                // Legacy endpoint redirect (if you want to keep backward compatibility)
+                Route::get('/admin/getdoublicate/{card_number}', [EmployeeVoteController::class, 'checkCardNumberExists']);
+                Route::get('/admin/getdoublicate', [EmployeeVoteController::class, 'checkCardNumberExists']);
+
+                // importData
+                route::post('/admin/import', 'importData');
             });
 
 
