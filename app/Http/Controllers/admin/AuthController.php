@@ -59,7 +59,9 @@ class AuthController extends Controller
 
 
 
-
+            // return response()->json([
+            //     'data' => $request->all,
+            // ]);
 
             // ✅ Validation
             $credentials = $request->validate([
@@ -77,15 +79,15 @@ class AuthController extends Controller
             if (!$user || !Hash::check($credentials['password'], $user->password)) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Email or password incorrect.'
-                ], 401);
+                    'message' => 'ئیمەیڵ یان ووشەی نهێنی هەڵەیە'
+                ], 201);
             }
 
             // ❌ If account inactive
             if ($user->isActive == 0) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'You cannot log in. Account is inactive.'
+                    'message' => 'ئەم هەژمارە ناچالاکە'
                 ], 403);
             }
 
@@ -156,6 +158,7 @@ class AuthController extends Controller
         ]);
         $request->user()->currentAccessToken()->delete();
 
+
         return response()->json([
             'success' => true,
             'message' => 'Logged out successfully'
@@ -164,8 +167,18 @@ class AuthController extends Controller
 
     public function getUserList()
     {
-        $user = User::with(['circle', 'base'])->orderby('id', 'desc')->get();
-
+        if (Auth::user()->role == 'admin') {
+            $user = User::where('circle_id', Auth::user()->circle_id)
+                ->where('role', '!=', 'superadmin')
+                ->with(['circle', 'base'])
+                ->orderby('id', 'desc')
+                ->get();
+        }
+        if (Auth::user()->role == 'superadmin') {
+            $user = User::with(['circle', 'base'])
+                ->orderby('id', 'desc')
+                ->get();
+        }
         return response()->json([
             'success' => true,
             'message' => 'all user',

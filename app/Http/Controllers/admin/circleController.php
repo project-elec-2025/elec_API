@@ -14,7 +14,15 @@ class circleController extends Controller
     //
     public function getAllcircle()
     {
-        $data = circle::orderby('id', 'desc')->get();
+        if (Auth::user()->role == 'admin') {
+            $data = circle::find(Auth::user()->circle_id);
+            $type = "admin";
+        }
+        if (Auth::user()->role == 'superadmin') {
+            $data = circle::orderby('id', 'desc')->get();
+            $type = "superadmin";
+        }
+
         if ($data->count() == 0) {
             return response()->json([
                 'success' => false,
@@ -25,6 +33,7 @@ class circleController extends Controller
             'success' => true,
             'message' => 'all circle data',
             'AllData' => $data,
+            'type' => $type
 
         ]);
     }

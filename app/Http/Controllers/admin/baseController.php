@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\base;
 use App\Models\EmployeeVote;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
@@ -14,7 +15,13 @@ class baseController extends Controller
     //
     public function getAllBase()
     {
-        $data = base::with('cirlce:id,circle_name')->get();
+        if (Auth::user()->role === 'admin') {
+            $data = base::where('circle_id', Auth::user()->circle_id)
+                ->with('cirlce:id,circle_name')->get();
+        } else {
+            $data = base::with('cirlce:id,circle_name')->get();
+        }
+
         if ($data->count() == 0) {
             return response()->json([
                 'success' => false,
@@ -86,11 +93,7 @@ class baseController extends Controller
 
     public function update(Request $request, $id)
     {
-        // return response()->json([
-        //     'success' => true,
-        //     'message' => $request->all(),
-
-        // ], 200);
+      
         $request->validate([
             'base_name' => 'required|string|max:255|unique:bases,base_name,' . $id,
             'circle_id' => 'required|numeric'

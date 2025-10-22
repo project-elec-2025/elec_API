@@ -19,6 +19,7 @@ use function PHPUnit\Framework\isNull;
 class EmployeeVoteController extends Controller
 {
 
+
     public function indexx()
     {
 
@@ -80,8 +81,26 @@ class EmployeeVoteController extends Controller
         $perPage = $request->get('per_page', 10); // default to 10
         $page = $request->get('page', 1);
 
-        if (Auth::user()->role == "admin") {
+        if (Auth::user()->role === "admin") {
+            $data = EmployeeVote::where('circle_id', Auth::user()->circle_id)
+                ->with(['cirlces', 'base'])
+                // ->get();
+                ->paginate($perPage, ['*'], 'page', $page);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'List of those who did not vote',
+                'data' => $data->items(),
+                'pagination' => [
+                    'current_page' => $data->currentPage(),
+                    'last_page' => $data->lastPage(),
+                    'per_page' => $data->perPage(),
+                    'total' => $data->total(),
+                ]
+            ], 200);
+        } else   if (Auth::user()->role === "superadmin") {
             $data = EmployeeVote::with(['cirlces', 'base'])
+                // ->get();
 
                 ->paginate($perPage, ['*'], 'page', $page);
 
@@ -304,7 +323,7 @@ class EmployeeVoteController extends Controller
         $vote->base = $request->base;
         $vote->base_id = $request->base_id;
         $vote->circle_id = $request->circle_id;
-        // $vote->is_election=$request->is_election;
+        $vote->is_election = $request->is_election;
         $vote->note = $request->note;
         // $vote->datetime=$request->datetime;
 
@@ -473,8 +492,16 @@ class EmployeeVoteController extends Controller
         if (Auth::user()->role === "admin") {
             $data = EmployeeVote::with(['cirlces', 'base'])
                 ->where('is_election', false)
+                ->where('circle_id',Auth::user()->circle_id)
                 ->paginate($perPage, ['*'], 'page', $page);
-        } else {
+        } 
+        
+        else  if (Auth::user()->role === "superadmin") {
+            $data = EmployeeVote::with(['cirlces', 'base'])
+                ->where('is_election', false)
+                 ->paginate($perPage, ['*'], 'page', $page);
+        } 
+        else {
             $data = EmployeeVote::with(['cirlces', 'base'])
                 ->where('base_id', Auth::user()->base_id)
                 ->where('is_election', false)
@@ -528,9 +555,18 @@ class EmployeeVoteController extends Controller
 
         if (Auth::user()->role === "admin") {
             $data = EmployeeVote::with(['cirlces', 'base'])
+            ->where('circle_id',Auth::user()->circle_id)
                 ->where('base_id', $base_id)
                 ->paginate($perPage, ['*'], 'page', $page);
-        } else {
+        } 
+        else     if (Auth::user()->role === "superadmin") {
+            $data = EmployeeVote::with(['cirlces', 'base'])
+             
+                ->where('base_id', $base_id)
+                ->paginate($perPage, ['*'], 'page', $page);
+        } 
+        
+        else {
             $data = EmployeeVote::with(['cirlces', 'base'])
                 ->where('base_id', Auth::user()->base_id)
                 // ->where('base_id', $base_id)
@@ -591,6 +627,12 @@ class EmployeeVoteController extends Controller
 
         if (Auth::user()->role === "admin") {
             $data = EmployeeVote::with(['cirlces', 'base'])
+                ->where('circle_id', Auth::user()->circle_id)
+                ->where('is_election', true)
+                ->paginate($perPage, ['*'], 'page', $page);
+        } else  if (Auth::user()->role === "superadmin") {
+            $data = EmployeeVote::with(['cirlces', 'base'])
+
                 ->where('is_election', true)
                 ->paginate($perPage, ['*'], 'page', $page);
         } else {
@@ -637,9 +679,17 @@ class EmployeeVoteController extends Controller
 
         // Get bases with their circle information
         // Get all circles with their bases
-        $circles = circle::with(['bases' => function ($query) {
-            $query->select(['id', 'base_name', 'circle_id']);
-        }])->get(['id', 'circle_name']);
+        if (Auth::user()->role === "admin") {
+            $circles = circle::where('id', Auth::user()->circle_id)
+                ->with(['bases' => function ($query) {
+                    $query->select(['id', 'base_name', 'circle_id']);
+                }])->get(['id', 'circle_name']);
+        } else {
+            $circles = circle::with(['bases' => function ($query) {
+                $query->select(['id', 'base_name', 'circle_id']);
+            }])->get(['id', 'circle_name']);
+        }
+
 
         // Get all vote counts in a single query
         $voteCounts = EmployeeVote::selectRaw('
@@ -803,9 +853,16 @@ class EmployeeVoteController extends Controller
     // amar employee
     public function amar()
     {
-        $allEmployee = EmployeeVote::count();
-        $allEmployeeNotVote = EmployeeVote::where('is_election', '=', false)->count();
-        $allEmployeeVote = EmployeeVote::where('is_election', '=', true)->count();
+        if (Auth::user()->role === 'superadmin') {
+            $allEmployee = EmployeeVote::count();
+            $allEmployeeNotVote = EmployeeVote::where('is_election', '=', false)->count();
+            $allEmployeeVote = EmployeeVote::where('is_election', '=', true)->count();
+        }
+        if (Auth::user()->role === 'admin') {
+            $allEmployee = EmployeeVote::where('circle_id', Auth::user()->circle_id)->count();
+            $allEmployeeNotVote = EmployeeVote::where('circle_id', Auth::user()->circle_id)->where('is_election', '=', false)->count();
+            $allEmployeeVote = EmployeeVote::where('circle_id', Auth::user()->circle_id)->where('is_election', '=', true)->count();
+        }
 
         return response()->json([
             'success' => true,

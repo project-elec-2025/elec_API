@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::post('/login', [AuthController::class, 'login']);
-route::get('admin/employee/indexx', [EmployeeVoteController::class, 'indexx']); //هەموو کارمەندا
+// route::get('admin/employee/indexx', [EmployeeVoteController::class, 'indexx']); //هەموو کارمەندا
 // route::get('admin/listNoteVoteTest', [EmployeeVoteController::class, 'listNoteVoteTest']); // ئەوانەی دەنگیان نەداوە
 
 Route::middleware('auth:sanctum')->group(
@@ -38,7 +38,7 @@ Route::middleware('auth:sanctum')->group(
         Route::controller(EmployeeVoteController::class)->group(function () {
 
             //admin
-            route::middleware(['role:admin'])->group(function () {
+            route::middleware(['role:admin,superadmin'])->group(function () {
 
                 route::post('admin/employee/add', 'store');
                 route::get('admin/employee/show/{id}', 'show');
@@ -86,6 +86,10 @@ Route::middleware('auth:sanctum')->group(
             route::get('findEmployee/{search}', 'findEmployee');
             route::get('findEmployeeByMobileName/{search}', 'findEmployeeByNameAndMobile');
 
+
+            // amar hatw nahatw
+            // route::get('/admin/allnahatw', 'all_nahatw');
+            // route::get('/admin/allhatw', 'all_hatw');
 
 
             route::get('admin/employee/index', 'index'); //هەموو کارمەندا
@@ -136,7 +140,7 @@ Route::middleware('auth:sanctum')->group(
 
             // fix
             route::post('base/fix', 'fix');
-        })->middleware(['role:admin']);
+        }); //->middleware(['role:admin']);
     }
 )
 ;
